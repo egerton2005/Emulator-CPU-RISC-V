@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <memory>
 #include <fstream>
+#include <cstring>
+
 
 
 class Memory {

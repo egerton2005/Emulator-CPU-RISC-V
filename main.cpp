@@ -97,10 +97,10 @@ void ProcessingII(uint32_t instr, std::vector<uint32_t>& regs, Cache& cache) {
         regs[rd] = data;
     }
     else if (funct3 == FMT_I::lbu) {
-        regs[rd] = data && 0xFF; 
+        regs[rd] = data & 0xFF; 
     }
     else if (funct3 == FMT_I::lhu) {
-        regs[rd] = data && 0xFFFF; 
+        regs[rd] = data & 0xFFFF; 
     }
 }
 
@@ -112,7 +112,7 @@ void ProcessingS(uint32_t instr, std::vector<uint32_t>& regs, Cache& cache) {
     uint8_t rs2 = (instr >> 20) & ((1 << SIZE_RS2) - 1);
     int32_t imm = static_cast<int32_t>(((((instr >> 25) & ((1 << SIZE_FUNC7) - 1)) << SIZE_RD) | imm1) << 20) >> 20;
     uint32_t address = regs[rs1] + imm;
-    uint32_t data  = cache.access(address, false);
+    // uint32_t data  = cache.access(address, false);
     if(funct3 == FMT_S::sb) {
         cache.write(address, (regs[rs2] & 0xFF), 1);
     }
