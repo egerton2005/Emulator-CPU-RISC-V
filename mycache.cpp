@@ -70,7 +70,7 @@ uint32_t CacheLRU::handle_miss(std::vector<CacheLine>& set, uint32_t tag, uint32
 }
 
 void CacheLRU::handle_write_miss(std::vector<CacheLine>& set, uint32_t tag, uint32_t index, uint32_t address, uint32_t value, uint32_t size) {
-    uint32_t dummy = handle_miss(set, tag, index, address);
+    handle_miss(set, tag, index, address);
     
     for (int way = 0; way < CACHE_WAY; way++) {
         if (set[way].valid && set[way].tag == tag) {
@@ -176,7 +176,7 @@ uint32_t CachePLRU::handle_miss(CacheSet& set, uint32_t tag, uint32_t index, uin
 }
 
 void CachePLRU::handle_write_miss(CacheSet& set, uint32_t tag, uint32_t index, uint32_t address, uint32_t value, uint32_t size) {
-    uint32_t dummy = handle_miss(set, tag, index, address);
+    handle_miss(set, tag, index, address);
     
     for (int way = 0; way < CACHE_WAY; way++) {
         if (set[way].valid && set[way].tag == tag) {
