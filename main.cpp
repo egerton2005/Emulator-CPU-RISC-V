@@ -7,6 +7,7 @@
 #include <cstring>
 #include <bitset>
 #include <cmath> 
+#include <new>    
 
 #include "mycache.hpp"
 

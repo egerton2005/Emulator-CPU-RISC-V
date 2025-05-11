@@ -7,6 +7,10 @@
 #include <cstdint>
 #include <memory>
 
+#include <cstring> 
+#include <iostream>  
+#include <fstream> 
+#include <new>    
 
 struct CacheLine {
     bool valid = false;

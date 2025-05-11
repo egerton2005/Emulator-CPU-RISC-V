@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cstring> 
+#include <iostream>  
+#include <fstream> 
+#include <new>    
+
 constexpr inline int MEMORY_SIZE = 512 * 1024 * 1024;
 constexpr inline int ADDRESS_LEN = 19;
 // Конфигурация кэша look-through write-back write-allocate

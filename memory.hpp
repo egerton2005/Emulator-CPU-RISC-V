@@ -7,6 +7,7 @@
 #include <memory>
 #include <fstream>
 #include <cstring>
+#include <new>    
 
 
 
