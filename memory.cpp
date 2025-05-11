@@ -1,4 +1,4 @@
-#include "memory.h"
+#include "memory.hpp"
 
 void Memory::load_fragment(std::ifstream& file) {
     while (file.peek() != EOF) {
