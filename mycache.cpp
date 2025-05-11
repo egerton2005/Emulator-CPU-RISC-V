@@ -1,4 +1,4 @@
-#include "mycache.h"
+#include "mycache.hpp"
 
 uint32_t CacheLRU::access(uint32_t address, bool is_instruction) {
     is_instruction ? ++total_accesses_inst_ : ++total_accesses_data_;

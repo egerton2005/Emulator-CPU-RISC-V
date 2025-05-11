@@ -8,7 +8,7 @@
 #include <bitset>
 #include <cmath> 
 
-#include "mycache.h"
+#include "mycache.hpp"
 
 void ProcessingR(uint32_t instr, std::vector<uint32_t>& regs) {
     uint8_t rd = (instr >> 7) & ((1 << SIZE_RD) - 1);
@@ -281,7 +281,7 @@ void print_cache_stats(const CacheLRU& lru, const CachePLRU& plru) {
 }
 
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
     std::string input_name, output_name;
     uint64_t start_fragment, size_fragment;
     for(int i = 1; i < argc; ++i) {
