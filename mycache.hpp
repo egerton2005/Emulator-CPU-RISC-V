@@ -41,6 +41,8 @@ public:
     void write(uint32_t address, uint32_t value, uint32_t size);
 
     uint8_t* output(uint64_t address);
+    
+    void flush();
 private:
     void update_lru(std::vector<CacheLine>& set, int used_way);
 
@@ -57,6 +59,13 @@ struct CacheSet {
     uint32_t plru_bits = 0;
     CacheLine& operator[](int i) {
         return lines[i];
+    }
+    std::vector<CacheLine>::iterator begin() {
+        return lines.begin();
+    }
+
+    std::vector<CacheLine>::iterator end() {
+        return lines.end();
     }
 };
 
@@ -81,6 +90,8 @@ public:
     void write(uint32_t address, uint32_t value, uint32_t size);
 
     uint8_t* output(uint64_t address);
+
+    void flush();
 private:
     void update_plru_bits(CacheSet& set, int used_way);
 

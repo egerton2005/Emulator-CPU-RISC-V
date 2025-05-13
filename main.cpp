@@ -19,29 +19,29 @@ void ProcessingR(uint32_t instr, std::vector<uint32_t>& regs) {
     uint8_t funct7 = (instr >> 25) & ((1 << SIZE_FUNC7) - 1);
     if(funct7 == 0x01) {
         if(funct3 == FMT_R::mul) {
-            int64_t value = static_cast<int64_t>(static_cast<int32_t>(regs[rs1])) * static_cast<int64_t>(static_cast<int32_t>(regs[rs1]));
+            int64_t value = static_cast<int64_t>(static_cast<int32_t>(regs[rs1])) * static_cast<int64_t>(static_cast<int32_t>(regs[rs2]));
             regs[rd] = value & 0xFFFFFFFF;
         }
         else if(funct3 == FMT_R::mulh) {
-            int64_t value = static_cast<int64_t>(static_cast<int32_t>(regs[rs1])) * static_cast<int64_t>(static_cast<int32_t>(regs[rs1]));
+            int64_t value = static_cast<int64_t>(static_cast<int32_t>(regs[rs1])) * static_cast<int64_t>(static_cast<int32_t>(regs[rs2]));
             regs[rd] = (value >> 32) & 0xFFFFFFFF;
         }
         else if(funct3 == FMT_R::mulhsu) {
-            int64_t value = static_cast<int64_t>(static_cast<int32_t>(regs[rs1])) * static_cast<uint64_t>(regs[rs1]);
+            int64_t value = static_cast<int64_t>(static_cast<int32_t>(regs[rs1])) * static_cast<uint64_t>(regs[rs2]);
             regs[rd] = (value >> 32) & 0xFFFFFFFF;
         }
         else if(funct3 == FMT_R::mulhu) {
-            int64_t value = static_cast<uint64_t>(regs[rs1]) * static_cast<uint64_t>(regs[rs1]);
+            int64_t value = static_cast<uint64_t>(regs[rs1]) * static_cast<uint64_t>(regs[rs2]);
             regs[rd] = (value >> 32) & 0xFFFFFFFF;
         }
         else if(funct3 == FMT_R::divv) {
-            regs[rd] = static_cast<int32_t>(regs[rs1]) / static_cast<int32_t>(regs[rs1]);
+            regs[rd] = static_cast<int32_t>(regs[rs1]) / static_cast<int32_t>(regs[rs2]);
         }
         else if(funct3 == FMT_R::divu) {
             regs[rd] = (regs[rs1] / regs[rs2]);
         }
         else if(funct3 == FMT_R::rem) {
-            regs[rd] = static_cast<int32_t>(regs[rs1]) % static_cast<int32_t>(regs[rs1]);
+            regs[rd] = static_cast<int32_t>(regs[rs1]) % static_cast<int32_t>(regs[rs2]);
         }
         else if(funct3 == FMT_R::remu) {
             regs[rd] = (regs[rs1] % regs[rs2]);
@@ -76,7 +76,7 @@ void ProcessingR(uint32_t instr, std::vector<uint32_t>& regs) {
         regs[rd] = (static_cast<int32_t>(regs[rs1]) < static_cast<int32_t>(regs[rs2])) ? 1 : 0; 
     }
     else if(funct3 == FMT_R::sltu) {
-        regs[rd] = (regs[rs2] < regs[rs2]) ? 1 : 0; 
+        regs[rd] = (regs[rs1] < regs[rs2]) ? 1 : 0; 
     }
 }
 
@@ -170,9 +170,11 @@ void ProcessingI(uint32_t instr, std::vector<uint32_t>& regs, uint32_t& pc) {
 void ProcessingB(uint32_t instr, std::vector<uint32_t>& regs, uint32_t& pc) {
     uint8_t funct3 = (instr >> 12) & ((1 << SIZE_FUNC3) - 1);
     uint8_t rs1 = (instr >> 15) & ((1 << SIZE_RS1) - 1);
-    uint8_t rs2 = (instr >> 20) & ((1 << SIZE_RS1) - 1);
-    uint32_t imm_prom = ((((instr >> 31) & 1) << 1) | ((instr >> 7) & 1)) << 11;
-    imm_prom |= (((instr >> 25) & ((1 << 6) - 1)) << 5) | (((instr >> 8) & ((1 << 4) - 1)) << 1);
+    uint8_t rs2 = (instr >> 20) & ((1 << SIZE_RS2) - 1);
+    uint32_t imm_prom = (((instr >> 31) & 0x1) << 12) |
+                (((instr >> 7) & 0x1) << 11) |
+                (((instr >> 25) & 0x3F) << 5) |
+                (((instr >> 8) & 0xF) << 1);
     int32_t imm = static_cast<int32_t>(imm_prom << 19) >> 19;
     if(funct3 == FMT_B::beq) {
         if(regs[rs1] == regs[rs2]) pc += imm - 4;
@@ -213,7 +215,7 @@ void ProcessingJU(uint32_t instr, std::vector<uint32_t>& regs, uint32_t& pc) {
 }
 
 template<typename CacheType>
-uint32_t run_simulation(CacheType& cache, std::vector<uint32_t> registers) {
+uint32_t run_simulation(CacheType& cache, std::vector<uint32_t>& registers) {
     uint32_t pc = registers[0];
     uint32_t stop_signal = registers[1];
     registers[0] = 0;
@@ -253,7 +255,9 @@ uint32_t run_simulation(CacheType& cache, std::vector<uint32_t> registers) {
         }
         else if(opcode == FMT::I_END) break;
         else {
-            std::cerr << "Undefind opcode\n";
+            std::cerr << "Undefind opcode " << opcode << '\n';
+            std::cerr << "Inst: " << instr << '\n';
+            std::cerr << "pc: " << pc << '\n';
             return pc;
         }
     }
@@ -266,8 +270,8 @@ void print_cache_stats(const CacheLRU& lru, const CachePLRU& plru) {
             printf("%s\tnan%%\tnan%%\tnan%%\n", name);
             return;
         }
-        // std::cout<< cache.total_accesses_inst_ << ' ' << cache.total_accesses_data_ << '\n';
-        // std::cout<< cache.inst_hits_ << ' ' << cache.data_hits_ << '\n';
+        std::cout<< "total accesses inst: " << cache.total_accesses_inst_ << " total accesses data: " << cache.total_accesses_data_ << '\n';
+        std::cout<< "hits inst: " << cache.inst_hits_ << "hits data: " << cache.data_hits_ << '\n';
         double total_rate = ((cache.inst_hits_ + cache.data_hits_) * (double)100.0) / (cache.total_accesses_inst_ + cache.total_accesses_data_);
         double inst_rate = (cache.inst_hits_ * (double)100.0) / (cache.total_accesses_inst_);
         double data_rate = (cache.data_hits_ * (double)100.0) / (cache.total_accesses_data_);
@@ -307,8 +311,9 @@ int main(int argc, char* argv[]) {
     }
 
     std::vector<uint32_t> registers(32, 0);
-
+    
     fin.read(reinterpret_cast<char*>(&registers[0]), 32 * sizeof(uint32_t));
+    std::vector<uint32_t> registers2 = registers;
 
     Memory memory;
     memory.load_fragment(fin);
@@ -316,7 +321,10 @@ int main(int argc, char* argv[]) {
     CachePLRU cache_bit_plru(memory);
 
     run_simulation<CacheLRU>(cache_lru, registers);
-    uint32_t pc_res = run_simulation<CachePLRU>(cache_bit_plru, registers);
+    uint32_t pc_res = run_simulation<CachePLRU>(cache_bit_plru, registers2);
+    
+    cache_lru.flush();
+    cache_bit_plru.flush();
 
     if(!output_name.empty()) {
         std::ofstream fuot(output_name, std::ios::binary);

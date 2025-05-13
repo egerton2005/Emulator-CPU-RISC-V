@@ -103,6 +103,19 @@ uint8_t* CacheLRU::output(uint64_t address) {
     return memory_.output(address);
 }
 
+void CacheLRU::flush() {
+    for (int i = 0; i < sets_.size(); ++i) {
+        for (auto& line : sets_[i]) {
+            if (line.valid && line.dirty) {
+                uint32_t addr = (line.tag << (CACHE_OFFSET_LEN + CACHE_INDEX_LEN)) 
+                               | (i << CACHE_OFFSET_LEN);
+                memory_.write_block(addr, line.data, CACHE_LINE_SIZE);
+                line.dirty = false;
+            }
+        }
+    }
+}
+
 
 
 uint32_t CachePLRU::access(uint32_t address, bool is_instruction) {
@@ -201,4 +214,17 @@ int CachePLRU::find_lru_victim(CacheSet& set) {
 
 uint8_t* CachePLRU::output(uint64_t address) {
     return memory_.output(address);
+}
+
+void CachePLRU::flush() {
+    for (int i = 0; i < sets_.size(); ++i) {
+        for (auto& line : sets_[i]) {
+            if (line.valid && line.dirty) {
+                uint32_t addr = (line.tag << (CACHE_OFFSET_LEN + CACHE_INDEX_LEN)) 
+                               | (i << CACHE_OFFSET_LEN);
+                memory_.write_block(addr, line.data, CACHE_LINE_SIZE);
+                line.dirty = false;
+            }
+        }
+    }
 }
