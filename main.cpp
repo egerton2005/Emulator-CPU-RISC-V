@@ -270,14 +270,12 @@ void print_cache_stats(const CacheLRU& lru, const CachePLRU& plru) {
             printf("%s\tnan%%\tnan%%\tnan%%\n", name);
             return;
         }
-        std::cout<< "total accesses inst: " << cache.total_accesses_inst_ << " total accesses data: " << cache.total_accesses_data_ << '\n';
-        std::cout<< "hits inst: " << cache.inst_hits_ << "hits data: " << cache.data_hits_ << '\n';
         double total_rate = ((cache.inst_hits_ + cache.data_hits_) * (double)100.0) / (cache.total_accesses_inst_ + cache.total_accesses_data_);
         double inst_rate = (cache.inst_hits_ * (double)100.0) / (cache.total_accesses_inst_);
         double data_rate = (cache.data_hits_ * (double)100.0) / (cache.total_accesses_data_);
         
         printf("%s\t%3.5f%%\t%3.5f%%\t%3.5f%%\n", 
-               name, total_rate, inst_rate, data_rate);
+            name, total_rate, inst_rate, data_rate);
     };
     
     printf("replacement\thit rate\thit rate (inst)\thit rate (data)\n");
@@ -335,5 +333,9 @@ int main(int argc, char* argv[]) {
     }
 
     print_cache_stats(cache_lru, cache_bit_plru);
+    std::cout<< "total accesses inst: " << cache_lru.total_accesses_inst_ << " total accesses data: " << cache_lru.total_accesses_data_ << '\n';
+    std::cout<< "hits inst: " << cache_lru.inst_hits_ << "hits data: " << cache_lru.data_hits_ << '\n';
+    std::cout<< "total accesses inst: " << cache_bit_plru.total_accesses_inst_ << " total accesses data: " << cache_bit_plru.total_accesses_data_ << '\n';
+    std::cout<< "hits inst: " << cache_bit_plru.inst_hits_ << "hits data: " << cache_bit_plru.data_hits_ << '\n';
     return 0;
 }
